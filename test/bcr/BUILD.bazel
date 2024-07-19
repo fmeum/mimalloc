@@ -1,0 +1,37 @@
+sh_test(
+    name = "override_test",
+    srcs = ["override_test.sh"],
+    data = [":simple_cat"],
+    env = {"SIMPLE_CAT": "$(rlocationpath :simple_cat)"},
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+cc_binary(
+    name = "simple_cat",
+    srcs = ["simple_cat.c"],
+)
+
+cc_test(
+    name = "api_test",
+    srcs = ["api_test.c"],
+    deps = ["@mimalloc//:mimalloc-api"],
+)
+
+constraint_setting(
+    name = "libc",
+)
+
+constraint_value(
+    name = "musl",
+    constraint_setting = ":libc",
+    visibility = ["//visibility:public"],
+)
+
+platform(
+    name = "linux_amd64_musl",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+        ":musl",
+    ],
+)

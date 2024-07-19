@@ -9,3 +9,5 @@ docs/
 *.zip
 *.tar
 *.gz
+bazel-*
+MODULE.bazel.lock

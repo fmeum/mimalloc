@@ -1,0 +1,5 @@
+common --custom_malloc=@mimalloc
+
+common --test_output=errors
+common --verbose_failures
+common --features=layering_check

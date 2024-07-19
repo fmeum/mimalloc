@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main, bzlmod]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  # Cancel previous actions from the same PR: https://stackoverflow.com/a/72408109
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, macos-12, windows-2019, macos-14]
+        cc: [default]
+        include:
+          - os: ubuntu-20.04
+            cc: clang
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: bazel test //... (default compiler)
+        if: matrix.cc == 'default'
+        working-directory: test/bcr
+        run: bazel test --test_output=errors //...
+
+      - name: bazel test //... (clang)
+        if: matrix.cc == 'clang'
+        working-directory: test/bcr
+        run: bazel test --test_output=errors --repo_env=CC=clang //...
