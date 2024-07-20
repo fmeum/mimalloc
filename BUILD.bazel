@@ -1,12 +1,13 @@
-# Override malloc/free with mimalloc via:
+# Override malloc/free with mimalloc via one of:
+#   malloc = "@mimalloc"
 #   --custom_malloc=@mimalloc
-# This target cannot be depended on directly.
 alias(
     name = "mimalloc",
     actual = select({
         "@platforms//os:windows": ":mimalloc-dynamic",
         "//conditions:default": ":mimalloc-static",
     }),
+    visibility = ["//visibility:public"],
 )
 
 # Depend on this target in addition to using --custom_malloc=@mimalloc to get
