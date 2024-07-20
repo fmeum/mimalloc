@@ -10,8 +10,7 @@ alias(
     visibility = ["//visibility:public"],
 )
 
-# Depend on this target in addition to using --custom_malloc=@mimalloc to get
-# access to the mimalloc.h API.
+# Additionally depend on this target to get access to the mimalloc.h API.
 cc_library(
     name = "mimalloc-api",
     hdrs = ["include/mimalloc.h"],
@@ -23,11 +22,13 @@ cc_library(
 cc_library(
     name = "mimalloc-static",
     implementation_deps = [":mimalloc-lib"],
+    tags = ["__DONT_DEPEND_ON_DEF_PARSER__"],
 )
 
 cc_library(
     name = "mimalloc-dynamic",
     linkopts = ["/INCLUDE:mi_version"],
+    tags = ["__DONT_DEPEND_ON_DEF_PARSER__"],
     deps = [
         ":mimalloc-override-import",
     ],
@@ -35,8 +36,8 @@ cc_library(
 
 cc_import(
     name = "mimalloc-override-import",
-    shared_library = ":mimalloc-override",
     interface_library = ":mimalloc-override-interface",
+    shared_library = ":mimalloc-override",
     deps = [":mimalloc-redirect"],
 )
 
@@ -112,6 +113,7 @@ cc_library(
             "MI_STATIC_LIB",
         ],
     }),
+    tags = ["__DONT_DEPEND_ON_DEF_PARSER__"],
     textual_hdrs = [
         # keep sorted
         "src/alloc-override.c",
