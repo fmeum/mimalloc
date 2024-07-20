@@ -21,7 +21,10 @@ cc_library(
 
 cc_library(
     name = "mimalloc-static",
-    implementation_deps = [":mimalloc-lib"],
+    implementation_deps = [
+        ":mimalloc-alloc-override",
+        ":mimalloc-lib",
+    ],
     tags = ["__DONT_DEPEND_ON_DEF_PARSER__"],
 )
 
@@ -98,7 +101,7 @@ cc_library(
     }),
     linkstatic = True,
     local_defines = [
-        "MI_MALLOC_OVERRIDE",
+        # "MI_MALLOC_OVERRIDE",
     ] + select({
         "@platforms//os:windows": [
             "MI_SHARED_LIB",
@@ -131,6 +134,38 @@ cc_library(
         "@platforms//os:windows": [":mimalloc-redirect"],
         "//conditions:default": [],
     }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "mimalloc-alloc-override",
+    srcs = [
+        "include/mimalloc.h",
+        "include/mimalloc/atomic.h",
+        "include/mimalloc/internal.h",
+        "include/mimalloc/track.h",
+        "include/mimalloc/types.h",
+        "src/alloc-override.c",
+    ],
+    linkstatic = True,
+    local_defines = [
+        "MI_MALLOC_OVERRIDE",
+        "MI_IN_ALLOC_C",
+    ] + select({
+        "@platforms//os:windows": [
+            "MI_SHARED_LIB",
+            "MI_SHARED_LIB_EXPORT",
+        ],
+        "@platforms//os:macos": [
+            "MI_STATIC_LIB",
+            "MI_OSX_INTERPOSE=1",
+            "MI_OSX_ZONE=1",
+        ],
+        "//conditions:default": [
+            "MI_STATIC_LIB",
+        ],
+    }),
+    copts = ["-include", "include/mimalloc.h", "-include", "include/mimalloc/internal.h"],
     alwayslink = True,
 )
 
